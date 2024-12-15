@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zombie Survival City Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background-color: #222;  /* Dark background */
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+         /* Styling for the heading */
+         h1 {
+            font-family: 'Press Start 2P', cursive;  /* Retro gaming font */
+            font-size: 4rem;
+            text-align: center;
+            color: #ff4f5e;  /* Bright red to simulate a danger vibe */
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7), 0 0 25px red, 0 0 5px darkred;
+            margin-top: 20px;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: pulse 1.5s infinite;  /* Animation for pulsating effect */
+        }
+
+        /* Animation for pulsating text */
+        @keyframes pulse {
+            0% {
+                text-shadow: 0 0 5px #ff4f5e, 0 0 10px #ff4f5e, 0 0 15px #ff4f5e;
+            }
+            50% {
+                text-shadow: 0 0 10px #ff4f5e, 0 0 20px #ff4f5e, 0 0 30px #ff4f5e;
+            }
+            100% {
+                text-shadow: 0 0 5px #ff4f5e, 0 0 10px #ff4f5e, 0 0 15px #ff4f5e;
+            }
+        }
+
+        .weather-card {
+            position: absolute;
+            top: 90px;
+            right: 10px;
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            z-index: 1000;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            width: 220px;
+        }
+        
+        
+        .weather-card h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #fbbf24;
+        }
+
+        .weather-card .weather-icon {
+            font-size: 50px;
+            margin: 15px 0;
+        }
+
+        .weather-card .weather-status {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .zombie-marker {
+            background-color: red;
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            border: 2px solid black;
+        }
+
+        .zombie-danger-zone {
+            fill-color: rgba(255, 0, 0, 0.2);
+            fill-opacity: 0.2;
+            color: red;
+            weight: 2;
+            dashArray: 5;
+        }
+
+        .user-marker {
+            background-color: green;
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            border: 2px solid black;
+        }
+        /* Info Box (Right Shifted by 2 mm) */
+.info-box {
+    position: absolute;
+    bottom: 82px; /* Position remains as adjusted previously */
+    right: calc(20px - 7.56px); /* Shift 2 mm (7.56px) to the right */
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 20px; /* Padding */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+    width: 250px; /* Adjusted width */
+    height: auto; /* Adjust height based on content */
+}
+
+/* Header style */
+.info-box h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #fbbf24;
+}
+
+/* Paragraph style */
+.info-box p {
+    margin: 8px 0; /* Increased margin for spacing */
+}
+
+
+       
+        /* Legend Box Styles */
+.legend-box {
+    position: fixed;
+    bottom: 10px;    /* Position it at the bottom */
+    right: 10px;     /* Position it at the right */
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+    width: 100px;    /* Half the original width */
+    max-height: 150px; /* Reduced height */
+    overflow-y: auto; /* Add scroll for overflow */
+}
+
+.legend-box h3 {
+    margin: 0 0 8px;
+    font-size: 12px;  /* Smaller font size */
+    color: #fbbf24;
+    text-align: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px; /* Reduced space between items */
+    font-size: 10px;    /* Smaller text for better fit */
+}
+
+.legend-icon {
+    width: 10px;  /* Smaller icon size */
+    height: 10px;
+    margin-right: 5px;  /* Reduced space between icon and text */
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-item img {
+    width: 10px;  /* Adjust image size */
+    height: 10px;
+    margin-right: 5px;  /* Reduced margin */
+}
+
+        .chat-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 20px 40px; /* Increase the padding to double the size */
+    font-weight: bold;  /* Make the text bold */
+    border-radius: 10px; /* Increase border radius for a rounded look */
+    cursor: pointer;
+    z-index: 1100;
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
+    font-size: 18px;  /* Increase font size */
+}
+
+.chat-button:hover {
+    background-color: #45a049; /* Slightly darker green on hover */
+}
+
+
+
+
+        button {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .user-message {
+            text-align: right;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        /* Survivor Selection Modal */
+        .survivor-selection-popup {
+            position: fixed;
+            bottom: 70px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            width: 300px;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1001;
+            display: none;
+        }
+
+        .survivor-selection-popup select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .survivor-selection-popup button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #chatBox {
+    display: none;
+    position: fixed;
+    bottom: 100px;
+    left: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    z-index: 1000;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align:center;">Zombie Survival Live Map</h1>
+    <div id="map"></div>
+    <div class="weather-card" id="weather-card">
+        <h2>Weather Update</h2>
+        <div id="weather-icon" class="weather-icon">☀</div>
+        <p id="weather-status" class="weather-status">Sunny</p>
+    </div>
+
+    <div class="info-box" id="info-box">
+        <h3>Distance Info</h3>
+        <p id="distance-zombie">Nearest Zombie: 0 m</p>
+        <p id="distance-survivor">Nearest Survivor: 0 m</p>
+        <p id="distance-resource">Nearest Resource: 0 m</p>
+        <p id="zombie-count">Total Zombies: 6</p>
+    </div>
+
+     <!-- Survivor Selection Popup -->
+     <div class="survivor-selection-popup" id="survivorSelectionPopup">
+        <h2>Select a Survivor</h2>
+        <select id="survivorSelect">
+            <option value="">-- Select Survivor --</option>
+            <option value="Mansha">Mansha</option>
+            <option value="Ishika">Ishika</option>
+            <option value="Anurag">Anurag</option>
+            <option value="Om">Om</option>
+            <option value="Geetika">Geetika</option>
+            <option value="Sahil">Sahil</option>
+        </select>
+        <button id="startChatBtn">Start Chat</button>
+    </div>
+
+    <!-- Legend Box -->
+<div class="legend-box" id="legendBox">
+    <h3>Legend</h3>
+    <div class="legend-item">
+        <span class="legend-icon" style="background-color: red;"></span>
+        <span class="legend-text">Zombie</span>
+    </div>
+    <div class="legend-item">
+        <img src="https://cdn-icons-png.flaticon.com/512/706/706164.png" alt="Food" class="legend-icon" />
+        <span class="legend-text">Food</span>
+    </div>
+    <div class="legend-item">
+        <img src="https://cdn-icons-png.flaticon.com/512/2371/2371353.png" alt="Medical" class="legend-icon" />
+        <span class="legend-text">Medical</span>
+    </div>
+    <div class="legend-item">
+        <img src="https://cdn-icons-png.flaticon.com/512/3836/3836755.png" alt="Weapon" class="legend-icon" />
+        <span class="legend-text">Weapon</span>
+    </div>
+    <div class="legend-item">
+        <span class="legend-icon" style="background-color: green;"></span>
+        <span class="legend-text">Survivor</span>
+    </div>
+</div>
+
+    <!-- Chat button -->
+    <button class="chat-button" id="chatButton">Chat</button>
+
+    <!-- Chat Box -->
+    <div class="chat-box" id="chatBox">
+        <h2>Survivor Chat</h2>
+        <div class="chat-messages" id="chatMessages"></div>
+        <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." />
+        <button id="sendMessageBtn">Send</button>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([20.3553, 85.8180], 15);  // Default starting view
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Define a zombie prone zone (you can adjust the center and radius as needed)
+const zombieProneZone = L.circle([20.3550, 85.8180], { // Center point of the zone
+    color: 'red',              // Red border color
+    fillColor: 'red',          // Fill color (lighter red)
+    fillOpacity: 0.3,          // Transparency for the filled area
+    radius: 500                // Radius in meters (you can change it based on the danger zone size)
+}).addTo(map);
+
+// Optionally, add a popup or tooltip to the zone to describe it
+zombieProneZone.bindPopup("Zombie Prone Zone: High zombie activity area");
+
+// Optionally, update the zone based on dynamic zombie positions
+function updateZombieProneZone() {
+    // Calculate the central position of the zombie prone zone
+    const centerLat = 20.3550;
+    const centerLng = 85.8180;
+
+    // You could make this dynamic based on actual zombie positions or cluster detection
+    zombieProneZone.setLatLng([centerLat, centerLng]); // Update the center if needed
+    zombieProneZone.setRadius(500); // Update the radius dynamically if needed
+}
+
+        let zombies = [
+            { id: 1, lat: 20.3553, lng: 85.8180, lastUpdate: Date.now() },
+            { id: 2, lat: 20.3560, lng: 85.8190, lastUpdate: Date.now() },
+            { id: 3, lat: 20.3545, lng: 85.8175, lastUpdate: Date.now() },
+            { id: 4, lat: 20.3580, lng: 85.8205, lastUpdate: Date.now() },
+            { id: 5, lat: 20.3570, lng: 85.8210, lastUpdate: Date.now() },
+            { id: 6, lat: 20.3530, lng: 85.8170, lastUpdate: Date.now() }
+        ];
+
+        const zombieMarker = L.divIcon({ className: 'zombie-marker' });
+        const userMarker = L.divIcon({ className: 'user-marker' });
+
+        const resources = [
+            { type: 'Food', lat: 20.3558, lng: 85.8165, icon: 'https://cdn-icons-png.flaticon.com/512/706/706164.png' },
+            { type: 'Medical', lat: 20.3562, lng: 85.8195, icon: 'https://cdn-icons-png.flaticon.com/512/2371/2371353.png' },
+            { type: 'Weapon', lat: 20.3492, lng: 85.8195, icon: 'https://cdn-icons-png.flaticon.com/512/3836/3836755.png' },
+            { type: 'Food', lat: 20.3575, lng: 85.8170, icon: 'https://cdn-icons-png.flaticon.com/512/706/706164.png' },
+            { type: 'Food', lat: 20.3565, lng: 85.8160, icon: 'https://cdn-icons-png.flaticon.com/512/706/706164.png' },
+            { type: 'Medical', lat: 20.3590, lng: 85.8185, icon: 'https://cdn-icons-png.flaticon.com/512/2371/2371353.png' },
+            { type: 'Weapon', lat: 20.3550, lng: 85.8200, icon: 'https://cdn-icons-png.flaticon.com/512/3836/3836755.png' },
+            { type: 'Weapon', lat: 20.3595, lng: 85.8170, icon: 'https://cdn-icons-png.flaticon.com/512/3836/3836755.png' },
+            { type: 'Medical', lat: 20.3572, lng: 85.8178, icon: 'https://cdn-icons-png.flaticon.com/512/2371/2371353.png' }
+        ];
+
+        const survivors = [
+            { name: 'Mansha', lat: 20.3590, lng: 85.8200 },
+            { name: 'Ishika', lat: 20.3585, lng: 85.8185 },
+            { name: 'Anurag', lat: 20.3585, lng: 85.8184 },
+            { name: 'Om', lat: 20.3600, lng: 85.8220 },
+            { name: 'Geetika', lat: 20.3575, lng: 85.8205 },
+            { name: 'Sahil', lat: 20.3560, lng: 85.8215 }
+        ];
+
+        const userPosition = L.marker([20.3553, 85.8180], { icon: userMarker }).addTo(map);
+        userPosition.bindPopup("You are here");
+
+        // Function to calculate distances and update the info box
+    function updateDistances() {
+        const userLatLng = userPosition.getLatLng();
+
+        // Nearest zombie distance
+        let nearestZombieDist = Infinity;
+        zombies.forEach(zombie => {
+            const zombieLatLng = L.latLng(zombie.lat, zombie.lng);
+            const dist = userLatLng.distanceTo(zombieLatLng);
+            if (dist < nearestZombieDist) {
+                nearestZombieDist = dist;
+            }
+        });
+
+        // Nearest survivor distance
+        let nearestSurvivorDist = Infinity;
+        survivors.forEach(survivor => {
+            const survivorLatLng = L.latLng(survivor.lat, survivor.lng);
+            const dist = userLatLng.distanceTo(survivorLatLng);
+            if (dist < nearestSurvivorDist) {
+                nearestSurvivorDist = dist;
+            }
+        });
+
+        // Nearest resource distance
+        let nearestResourceDist = Infinity;
+        resources.forEach(resource => {
+            const resourceLatLng = L.latLng(resource.lat, resource.lng);
+            const dist = userLatLng.distanceTo(resourceLatLng);
+            if (dist < nearestResourceDist) {
+                nearestResourceDist = dist;
+            }
+        });
+
+        // Update the info box with the nearest distances
+        document.getElementById('distance-zombie').textContent = `Nearest Zombie: ${Math.round(nearestZombieDist)} m`;
+        document.getElementById('distance-survivor').textContent = `Nearest Survivor: ${Math.round(nearestSurvivorDist)} m`;
+        document.getElementById('distance-resource').textContent = `Nearest Resource: ${Math.round(nearestResourceDist)} m`;
+        document.getElementById('zombie-count').textContent = `Total Zombies: ${zombies.length}`;
+    }
+
+    // Update distances initially and on each map move
+    updateDistances();
+// Function to update the user's position
+function updateUserPosition(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+
+    // Update the user marker's position on the map
+    userPosition.setLatLng([lat, lng]);
+    map.setView([lat, lng], 15);  // Optionally center the map on the user's position
+
+    // Update distance info
+    updateDistances();
+}
+// Function to update the user's position
+function updateUserPosition(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+
+    // Update the user marker's position on the map
+    userPosition.setLatLng([lat, lng]);
+
+   
+
+    // Update distance info
+    updateDistances();
+}
+
+
+
+        // Zombie marker layer group to manage zombie markers
+        const zombieMarkerGroup = L.layerGroup().addTo(map);
+
+        // Function to update zombie positions
+        function updateZombiePositions() {
+            zombieMarkerGroup.clearLayers();
+            zombies = zombies.map(zombie => {
+                // Simulate zombie movement
+                const moveLat = (Math.random() - 0.5) * 0.001;
+                const moveLng = (Math.random() - 0.5) * 0.001;
+                
+                const newZombie = {
+                    ...zombie,
+                    lat: zombie.lat + moveLat,
+                    lng: zombie.lng + moveLng,
+                    lastUpdate: Date.now()
+                };
+                
+                // Create marker for each zombie
+                L.circleMarker([newZombie.lat, newZombie.lng], {
+                    radius: 6.5,
+                    fillColor: 'red',
+                    color: 'black',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.6
+                }).addTo(zombieMarkerGroup).bindPopup(`Zombie ${newZombie.id}`);
+                
+                return newZombie;
+            });
+
+            // Update zombie count
+            document.getElementById('zombie-count').textContent = `Total Zombies: ${zombies.length}`;
+        }
+
+        // Find zombie clusters (groups of 3 or more zombies within close proximity)
+        function findZombieClusters(zombies, radius = 0.002) {
+            const clusters = [];
+            const visitedZombies = new Set();
+
+            zombies.forEach((zombie, index) => {
+                if (visitedZombies.has(zombie)) return;
+                
+                const cluster = [zombie];
+                visitedZombies.add(zombie);
+
+                zombies.forEach((otherZombie, otherIndex) => {
+                    if (index !== otherIndex && !visitedZombies.has(otherZombie)) {
+                        const distance = Math.sqrt(
+                            Math.pow(zombie.lat - otherZombie.lat, 2) + 
+                            Math.pow(zombie.lng - otherZombie.lng, 2)
+                        );
+                        
+                        if (distance <= radius) {
+                            cluster.push(otherZombie);
+                            visitedZombies.add(otherZombie);
+                        }
+                    }
+                });
+
+                if (cluster.length >= 3) {
+                    clusters.push(cluster);
+                }
+            });
+
+            return clusters;
+        }
+
+        // Initial render of resources and survivors
+        resources.forEach(resource => {
+            L.marker([resource.lat, resource.lng], {
+                icon: L.icon({ iconUrl: resource.icon, iconSize: [30, 30] })
+            }).addTo(map).bindPopup(`${resource.type} Resource`);
+        });
+
+        survivors.forEach(survivor => {
+            L.marker([survivor.lat, survivor.lng]).addTo(map).bindPopup(`Survivor: ${survivor.name}`);
+        });
+
+        // Update zombie positions and markers every 5 seconds
+        setInterval(updateZombiePositions, 2000);
+
+        // Initial update of zombie positions
+        updateZombiePositions();
+        
+        const chatButton = document.getElementById('chatButton');
+        const survivorSelectionPopup = document.getElementById('survivorSelectionPopup');
+        const survivorSelect = document.getElementById('survivorSelect');
+        const startChatBtn = document.getElementById('startChatBtn');
+        const chatBox = document.getElementById('chatBox');
+        const chatMessages = document.getElementById('chatMessages');
+        const sendMessageBtn = document.getElementById('sendMessageBtn');
+        const chatInput = document.getElementById('chatInput');
+
+        let selectedSurvivor = null;
+
+        // Show survivor selection popup when chat button is clicked
+        chatButton.addEventListener('click', () => {
+            survivorSelectionPopup.style.display = 'block';  // Show popup
+        });
+
+        // Start chat with selected survivor
+        startChatBtn.addEventListener('click', () => {
+            selectedSurvivor = survivorSelect.value.trim();
+            if (selectedSurvivor) {
+                survivorSelectionPopup.style.display = 'none';  // Hide survivor selection
+                startChat(selectedSurvivor);
+            } else {
+                alert('Please select a survivor!');
+            }
+        });
+
+        // Function to start the chat with a specific survivor
+        function startChat(survivorName) {
+            chatBox.style.display = 'block';  // Show chat box
+            addMessage(`You are now chatting with ${survivorName}`, 'survivor');
+        }
+
+        // Function to add a message to the chat
+        function addMessage(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('chat-message');
+            if (sender === 'user') {
+                messageElement.classList.add('user-message');
+                messageElement.innerText = `You: ${message}`;
+            } else {
+                messageElement.classList.add('survivor-message');
+                messageElement.innerText = `${selectedSurvivor}: ${message}`;
+            }
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Handle message sending
+        sendMessageBtn.addEventListener('click', () => {
+            const message = chatInput.value.trim();
+            if (message) {
+                addMessage(message, 'user');
+                chatInput.value = '';  // Clear input
+                const aiResponse = generateAIResponse(message);
+                setTimeout(() => {
+                    addMessage(aiResponse, 'survivor');
+                }, 1000);  // Simulate AI response with a delay
+            }
+        });
+
+        // Handle "Enter" key to send message
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessageBtn.click();
+            }
+        });
+
+        function generateAIResponse(message) {
+    // Convert message to lowercase for case-insensitive comparison
+    const lowerMessage = message.toLowerCase();
+
+    // Check for specific keywords in the message
+    if (lowerMessage.includes("hi")) {
+        return "Hey there! How can I help?";
+    } else if (lowerMessage.includes("help")) {
+        return "Look at the map and come to me, I am in a safe zone.";
+    } else if (lowerMessage.includes("zombie")) {
+        return "Take your right, and then come to my coordinates FOLLOW THE MAP.";
+    } else if (lowerMessage.includes("food"||"water")) {
+        return "We found some food supplies nearby.";
+    } else if (lowerMessage.includes("weapon")) {
+        return "There are weapons at the nearby safehouse. Check the map!";
+    } else if (lowerMessage.includes("hospital") || lowerMessage.includes("injure")) {
+        return "We have a nearby hospital. Head there for treatment if you're injured!";
+    } else if (lowerMessage.includes("shelter")) {
+        return "We have a safe shelter nearby. Follow the map to get there!";
+    } else if (lowerMessage.includes("blood")) {
+        return "There's a blood bank in the nearby hospital. Get there for a transfusion if needed!";
+    }
+     else 
+    // Default response if no keywords matched
+    return "I don't understand that sorry.";
+}
+
+
+
+    </script>
+</body>
+
+</html>
