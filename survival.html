@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zombie Survival Map</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <style>
+      /* Importing the Creepster font */
+      @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+
+      /* General Styles */
+      body {
+        background-image: url(pic2.jpeg);
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        height: 100vh;
+      }
+
+      #dashboard {
+        margin-top: 100px;
+        margin-left: 390px;
+        width: 400px;
+        padding: 2rem;
+        background-color: rgba(0, 0, 0, 0.8);
+        border-radius: 10px;
+        text-align: center;
+        color: #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      #dashboard p {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+      }
+
+      #dashboard button {
+        padding: 0.7rem 1.5rem;
+        font-size: 1rem;
+        color: #fff;
+        background-color: #ff4d4d;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #dashboard button:hover {
+        background-color: #e33b3b;
+      }
+
+      .navbar {
+        padding: 2px 0px;
+        color: white;
+        background-color: #333;
+        height: 10vh;
+        font-size: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Creepster', system-ui;
+      }
+
+      .navbar span {
+        color: #ff4d4d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar">Zombie&nbsp;<span>Survival</span></div>
+    <div id="dashboard">
+      <p>
+        Surrounded by zombies? No time to panic—smash that button, and we’ll
+        show you the way out!
+      </p>
+      <form id="loginForm" action="index2.html" method="get">
+        <button id="escape-plan-btn">Route Me Out</button>
+      </form>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="hack.js"></script>
+  </body>
+</html>
