@@ -9,34 +9,130 @@
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <style>
-      /* Importing the Creepster font */
       @import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
 
-      /* General Styles */
       body {
-        background-image: url(pic2.jpeg);
         margin: 0;
         font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        color: #333;
+        color: #fff;
         height: 100vh;
+        overflow: hidden;
+        position: relative;
+        background: #000;
+      }
+
+      body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('https://e0.pxfuel.com/wallpapers/327/556/desktop-wallpaper-zombie-dark-zombie.jpg');
+        opacity: 0.8;
+        z-index: -1;
+        animation: flicker 2s infinite alternate;
+      }
+
+      @keyframes flicker {
+        0% {
+          opacity: 0.8;
+        }
+        50% {
+          opacity: 0.6;
+        }
+        100% {
+          opacity: 0.8;
+        }
+      }
+
+      body::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('https://www.transparenttextures.com/patterns/blood.png');
+        opacity: 0.3;
+        z-index: -1;
+        animation: bloodSplatter 5s infinite alternate;
+      }
+
+      @keyframes bloodSplatter {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(1.1);
+        }
+      }
+
+      .shadow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle,
+          transparent 10%,
+          rgba(0, 0, 0, 0.8) 60%
+        );
+        animation: moveShadows 10s infinite alternate;
+        z-index: -1;
+      }
+
+      @keyframes moveShadows {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(20px, 20px);
+        }
+      }
+
+      .navbar {
+        padding: 10px 0;
+        color: white;
+        background-color: rgba(34, 34, 34, 0.8);
+        height: 10vh;
+        font-size: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Creepster', system-ui;
+        text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.7);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        position: relative;
+        z-index: 1;
+      }
+
+      .navbar span {
+        color: #ff4d4d;
+        text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.9);
       }
 
       #dashboard {
-        margin-top: 100px;
-        margin-left: 390px;
-        width: 400px;
+        margin: 100px auto;
+        width: 90%;
+        max-width: 400px;
         padding: 2rem;
         background-color: rgba(0, 0, 0, 0.8);
         border-radius: 10px;
         text-align: center;
         color: #fff;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        border: 2px solid #ff4d4d;
+        position: relative;
+        z-index: 1;
       }
 
       #dashboard p {
         font-size: 1.2rem;
         margin-bottom: 20px;
+        line-height: 1.5;
+        text-shadow: 1px 1px 2px rgba(255, 0, 0, 0.7);
       }
 
       #dashboard button {
@@ -47,31 +143,89 @@
         border: none;
         border-radius: 5px;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: background-color 0.3s, transform 0.3s;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
       }
 
       #dashboard button:hover {
         background-color: #e33b3b;
+        transform: scale(1.05);
       }
 
-      .navbar {
-        padding: 2px 0px;
-        color: white;
-        background-color: #333;
-        height: 10vh;
-        font-size: 50px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-family: 'Creepster', system-ui;
+      #dashboard button:active {
+        transform: scale(0.95);
       }
 
-      .navbar span {
-        color: #ff4d4d;
+      #dashboard button::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+        background: rgba(255, 77, 77, 0.3);
+        z-index: -1;
+        animation: glow 1.5s infinite alternate;
+      }
+
+      @keyframes glow {
+        0% {
+          opacity: 0.3;
+          box-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+        }
+        100% {
+          opacity: 0.7;
+          box-shadow: 0 0 20px rgba(255, 77, 77, 0.7);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .navbar {
+          font-size: 40px;
+          height: 8vh;
+        }
+
+        #dashboard {
+          margin: 50px auto;
+          padding: 1.5rem;
+        }
+
+        #dashboard p {
+          font-size: 1rem;
+        }
+
+        #dashboard button {
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .navbar {
+          font-size: 30px;
+          height: 6vh;
+        }
+
+        #dashboard {
+          margin: 30px auto;
+          padding: 1rem;
+        }
+
+        #dashboard p {
+          font-size: 0.9rem;
+        }
+
+        #dashboard button {
+          padding: 0.4rem 0.8rem;
+          font-size: 0.8rem;
+        }
       }
     </style>
   </head>
   <body>
+    <div class="shadow"></div>
     <div class="navbar">Zombie&nbsp;<span>Survival</span></div>
     <div id="dashboard">
       <p>
