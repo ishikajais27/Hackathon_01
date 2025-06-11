@@ -9,6 +9,14 @@
   "routes": [
     {
       "src": "/(.*)",
+      "dest": "survival.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index2.html"
+    },
+    {
+      "src": "/(.*)",
       "dest": "server.js"
     }
   ]
