@@ -8,12 +8,8 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "survival.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index2.html"
+      "src": "/api/(.*)",
+      "dest": "server.js"
     },
     {
       "src": "/(.*)",

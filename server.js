@@ -6,9 +6,12 @@ const app = express()
 
 // Database Connection
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/zombie', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.log('Database connection error:', err))
+  .catch((err) => console.log('Database error:', err))
 
 // User Model
 const UserSchema = new mongoose.Schema({
@@ -19,19 +22,32 @@ const User = mongoose.model('User', UserSchema)
 
 // Middleware
 app.use(express.urlencoded({ extended: true }))
-app.use(express.static(path.join(__dirname, '.')))
+app.use(express.json())
+app.use(express.static(__dirname))
 
 // Routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'))
 })
 
-// Login Route
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body
+app.get('/login.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'))
+})
 
+app.get('/survival.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'survival.html'))
+})
+
+app.get('/index2.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index2.html'))
+})
+
+// Auth Routes
+app.post('/login', async (req, res) => {
   try {
+    const { email, password } = req.body
     const user = await User.findOne({ email })
+
     if (!user || user.password !== password) {
       return res.status(401).send('Invalid credentials')
     }
@@ -41,14 +57,13 @@ app.post('/login', async (req, res) => {
   }
 })
 
-// Signup Route
 app.post('/signup', async (req, res) => {
-  const { email, password } = req.body
-
   try {
+    const { email, password } = req.body
     const existingUser = await User.findOne({ email })
+
     if (existingUser) {
-      return res.status(400).send('Email already exists')
+      return res.status(400).send('Email exists')
     }
 
     const newUser = new User({ email, password })
@@ -59,7 +74,5 @@ app.post('/signup', async (req, res) => {
   }
 })
 
-// Start Server
-const PORT = process.env.PORT || 2000
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+// Export for Vercel
 module.exports = app
