@@ -417,7 +417,7 @@
 
       <div id="login-form" class="tab-content active">
         <p>Log in to access your survival plan and resources.</p>
-        <form id="loginForm" action="/login" method="post">
+        <form id="loginForm">
           <input
             type="email"
             id="login-email"
@@ -445,7 +445,7 @@
 
       <div id="signup-form" class="tab-content">
         <p>Create an account to access your survival plan.</p>
-        <form id="signupForm" action="/signup" method="post">
+        <form id="signupForm">
           <input
             type="email"
             id="signup-email"
@@ -487,6 +487,25 @@
           .querySelector(`.tab[onclick="switchTab('${tabName}')"]`)
           .classList.add('active')
       }
+
+      // Handle form submissions
+      document
+        .getElementById('loginForm')
+        .addEventListener('submit', function (e) {
+          e.preventDefault()
+          // Here you would normally validate and send data to server
+          // For demo purposes, we'll just redirect to survival page
+          window.location.href = '/survival.html'
+        })
+
+      document
+        .getElementById('signupForm')
+        .addEventListener('submit', function (e) {
+          e.preventDefault()
+          // Here you would normally validate and send data to server
+          // For demo purposes, we'll just redirect to survival page
+          window.location.href = '/survival.html'
+        })
     </script>
   </body>
 </html>
