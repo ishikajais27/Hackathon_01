@@ -30,15 +30,15 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'))
 })
 
-app.get('/login.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'))
-})
+// app.get('/login', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'login.html'))
+// })
 
-app.get('/survival.html', (req, res) => {
+app.get('/survival', (req, res) => {
   res.sendFile(path.join(__dirname, 'survival.html'))
 })
 
-app.get('/index2.html', (req, res) => {
+app.get('/index2', (req, res) => {
   res.sendFile(path.join(__dirname, 'index2.html'))
 })
 
@@ -74,5 +74,4 @@ app.post('/signup', async (req, res) => {
   }
 })
 
-// Export for Vercel
 module.exports = app
