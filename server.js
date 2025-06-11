@@ -101,7 +101,7 @@ app.use(express.json())
 app.use(express.static(__dirname))
 
 app.get('/', (req, res) => {
-  res.redirect('/survival.html')
+  res.redirect('/login.html')
 })
 
 app.get('/survival', (req, res) => {
